@@ -53,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
   try {
 
     final url = Uri.parse(
-      "http://192.168.18.172:3000/api/auth/login",
+      "https://reminder-steadily-cotton.ngrok-free.dev/api/auth/login",
     );
 
     final response = await http.post(

@@ -57,7 +57,7 @@ class _RegisterPageState extends State<RegisterPage> {
   try {
 
     final url = Uri.parse(
-      "http://192.168.18.172:3000/api/auth/register",
+      "https://reminder-steadily-cotton.ngrok-free.dev/api/auth/register",
     );
 
     final response = await http.post(
