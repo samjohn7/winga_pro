@@ -4,6 +4,7 @@ import '../../features/auth/login_page.dart';
 import '../../features/customer/customer_home.dart';
 import '../../features/producer/producer_home.dart';
 import '../../features/admin/admin_dashboard.dart';
+import '../../features/auth/register_page.dart';
 
 import 'route_names.dart';
 
@@ -15,6 +16,9 @@ class RouteGenerator {
 
       case RouteNames.login:
         return MaterialPageRoute(builder: (_) => const LoginPage());
+
+      case RouteNames.register:
+        return MaterialPageRoute(builder: (_) => const RegisterPage());
 
       case RouteNames.customerHome:
         return MaterialPageRoute(builder: (_) => const CustomerHome());
