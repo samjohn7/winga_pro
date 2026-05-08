@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../../core/router/route_names.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -21,37 +22,96 @@ class _RegisterPageState extends State<RegisterPage> {
 
   String selectedRole = "customer";
 
-  void registerUser() {
-    String fullName = fullNameController.text;
-    String phone = phoneController.text;
-    String password = passwordController.text;
-    String confirmPassword = confirmPasswordController.text;
+  Future<void> registerUser() async {
 
-    if (fullName.isEmpty ||
-        phone.isEmpty ||
-        password.isEmpty ||
-        confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
+  String fullName = fullNameController.text.trim();
+  String phone = phoneController.text.trim();
+  String password = passwordController.text.trim();
+  String confirmPassword = confirmPasswordController.text.trim();
 
-      return;
-    }
+  if (fullName.isEmpty ||
+      phone.isEmpty ||
+      password.isEmpty ||
+      confirmPassword.isEmpty) {
 
-    if (password != confirmPassword) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Passwords do not match")));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Please fill all fields"),
+      ),
+    );
 
-      return;
-    }
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Registration Successful")));
-
-    Navigator.pushReplacementNamed(context, RouteNames.login);
+    return;
   }
+
+  if (password != confirmPassword) {
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Passwords do not match"),
+      ),
+    );
+
+    return;
+  }
+
+  try {
+
+    final url = Uri.parse(
+      "http://192.168.18.172:3000/api/auth/register",
+    );
+
+    final response = await http.post(
+
+      url,
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: jsonEncode({
+
+        "full_name": fullName,
+        "phone": phone,
+        "password": password,
+        "role": selectedRole,
+
+      }),
+    );
+
+    if (response.statusCode == 200 ||
+        response.statusCode == 201) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Registration Successful"),
+        ),
+      );
+
+      Navigator.pushReplacementNamed(
+        context,
+        RouteNames.login,
+      );
+
+    } else {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.body),
+        ),
+      );
+
+    }
+
+  } catch (e) {
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Error: $e"),
+      ),
+    );
+
+  }
+}
 
   @override
   Widget build(BuildContext context) {

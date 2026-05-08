@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import '../../core/router/route_names.dart';
 
@@ -19,37 +21,133 @@ class _LoginPageState extends State<LoginPage> {
     return regex.hasMatch(phone);
   }
 
-  void loginUser() {
-    String phone = phoneController.text;
-    String password = passwordController.text;
+  Future<void> loginUser() async {
 
-    // EMPTY CHECK
-    if (phone.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields")),
-      );
-      return;
-    }
+  String phone = phoneController.text.trim();
+  String password = passwordController.text.trim();
 
-    // PHONE VALIDATION
-    if (!isValidTzNumber(phone)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter valid Tanzanian number")),
-      );
-      return;
-    }
+  // EMPTY CHECK
+  if (phone.isEmpty || password.isEmpty) {
 
-    // TEMP ROLE SIMULATION (REPLACE WITH BACKEND LATER)
-    if (phone == "customer") {
-      Navigator.pushReplacementNamed(context, RouteNames.customerHome);
-    } else if (phone == "producer") {
-      Navigator.pushReplacementNamed(context, RouteNames.producerHome);
-    } else {
-      Navigator.pushReplacementNamed(context, RouteNames.adminDashboard);
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Please fill all fields"),
+      ),
+    );
+
+    return;
   }
 
-  @override
+  // PHONE VALIDATION
+  if (!isValidTzNumber(phone)) {
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Enter valid Tanzanian number"),
+      ),
+    );
+
+    return;
+  }
+
+  try {
+
+    final url = Uri.parse(
+      "http://192.168.18.172:3000/api/auth/login",
+    );
+
+    final response = await http.post(
+
+      url,
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: jsonEncode({
+
+        "phone": phone,
+        "password": password,
+
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    // SUCCESS
+    if (response.statusCode == 200) {
+
+      String role = data["user"]["role"];
+
+      // CUSTOMER
+      if (role == "customer") {
+
+        Navigator.pushReplacementNamed(
+          context,
+          RouteNames.customerHome,
+        );
+
+      }
+
+      // PRODUCER
+      else if (role == "producer") {
+
+        // CHECK APPROVAL
+        bool verified = data["user"]["is_verified"];
+
+        if (!verified) {
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Your account is waiting admin approval",
+              ),
+            ),
+          );
+
+          return;
+        }
+
+        Navigator.pushReplacementNamed(
+          context,
+          RouteNames.producerHome,
+        );
+
+      }
+
+      // ADMIN
+      else if (role == "admin") {
+
+        Navigator.pushReplacementNamed(
+          context,
+          RouteNames.adminDashboard,
+        );
+
+      }
+
+    }
+
+    // FAILED LOGIN
+    else {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(data["message"]),
+        ),
+      );
+
+    }
+
+  } catch (e) {
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Error: $e"),
+      ),
+    );
+
+  }
+}  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
