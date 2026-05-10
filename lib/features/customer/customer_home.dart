@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'screens/home_screen.dart';
+import 'screens/producers_screen.dart';
 import 'screens/orders_screen.dart';
 import 'screens/wallet_screen.dart';
 import 'screens/profile_screen.dart';
+
 
 class CustomerHome extends StatefulWidget {
   const CustomerHome({super.key});
@@ -13,25 +15,23 @@ class CustomerHome extends StatefulWidget {
 }
 
 class _CustomerHomeState extends State<CustomerHome> {
-
   int currentIndex = 0;
 
   final List<Widget> screens = [
     const HomeScreen(),
+    const ProducersScreen(),
     const OrdersScreen(),
     const WalletScreen(),
     const ProfileScreen(),
+
   ];
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       body: screens[currentIndex],
 
       bottomNavigationBar: BottomNavigationBar(
-
         currentIndex: currentIndex,
 
         onTap: (index) {
@@ -43,11 +43,9 @@ class _CustomerHomeState extends State<CustomerHome> {
         type: BottomNavigationBarType.fixed,
 
         items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
 
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Browse"),
 
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag),
@@ -59,10 +57,7 @@ class _CustomerHomeState extends State<CustomerHome> {
             label: "Wallet",
           ),
 
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profile",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
     );
